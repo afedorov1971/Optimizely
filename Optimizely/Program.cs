@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using CommandLine;
-using EP.Core.Optimizely;
+using Optimizely.Client;
 
 namespace Optimizely
 {
@@ -15,6 +13,7 @@ namespace Optimizely
 			
 			do
 			{
+				// Fetch the data file using the datafile url
 				string datafile;
 				using (var webClient = new System.Net.WebClient())
 				{
@@ -45,6 +44,7 @@ namespace Optimizely
 
 		private static void TestWithUpdater(string sdkKey, string featureKey)
 		{
+			// Run datafile polling with 5 sec interval
 			var cfg = OptimizelyClient.Create(new OptimizelyClientCreateParameters(sdkKey).WithPollingPeriod(5));
 
 			do
@@ -52,9 +52,9 @@ namespace Optimizely
 				Thread.Sleep(5000);
 
 				// Evaluate a feature flag and a variable
-				var enabled1 = cfg.IsFeatureEnabled(new OptimizelyFeatureParameters(featureKey).WithArgument("IsLocal", true));
+				var enabled = cfg.IsFeatureEnabled(new OptimizelyFeatureParameters(featureKey).WithArgument("IsLocal", true));
 
-				Console.WriteLine($"{featureKey} audience local is {enabled1}");
+				Console.WriteLine($"{featureKey} audience local is {enabled}");
 				
 			} while (true);
 		}
