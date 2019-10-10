@@ -9,5 +9,8 @@ namespace Optimizely
 
 		[Option('k', "sdkKey", Required = true, HelpText = "Optimizely sdk key")]
 		public string SdkKey { get; set; }
+
+		[Option('f', "feature", Required = true, HelpText = "Optimizely feature toggle")]
+		public string FeatureToggle { get; set; }
 	}
 }

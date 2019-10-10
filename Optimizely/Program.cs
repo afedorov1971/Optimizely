@@ -9,7 +9,7 @@ namespace Optimizely
 {
 	internal static class Program
 	{
-		private static void TestSimpleWithDataFile(string sdkKey)
+		private static void TestSimpleWithDataFile(string sdkKey, string featureKey)
 		{
 			var url = $"https://cdn.optimizely.com/datafiles/{sdkKey}.json";
 			
@@ -28,13 +28,13 @@ namespace Optimizely
 				{
 
 					// Evaluate a feature flag and a variable
-					var enabled1 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters("test_feature").WithArgument("IsLocal", true));
+					var enabled1 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters(featureKey).WithArgument("IsLocal", true));
 
-					var enabled2 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters("test_feature").WithArgument("IsLocal", false));
+					var enabled2 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters(featureKey).WithArgument("IsLocal", false));
 
-					Console.WriteLine($"test_feature audience local is {enabled1}");
+					Console.WriteLine($"{featureKey} audience local is {enabled1}");
 
-					Console.WriteLine($"test_feature audience not local is {enabled2}");
+					Console.WriteLine($"{featureKey} audience not local is {enabled2}");
 				}
 
 				Thread.Sleep(5000);
@@ -43,7 +43,7 @@ namespace Optimizely
 		}
 
 
-		private static void TestWithUpdater(string sdkKey)
+		private static void TestWithUpdater(string sdkKey, string featureKey)
 		{
 			var cfg = OptimizelyClient.Create(new OptimizelyClientCreateParameters(sdkKey).WithPollingPeriod(5));
 
@@ -52,9 +52,9 @@ namespace Optimizely
 				Thread.Sleep(5000);
 
 				// Evaluate a feature flag and a variable
-				var enabled1 = cfg.IsFeatureEnabled(new OptimizelyFeatureParameters("test_feature").WithArgument("IsLocal", true));
+				var enabled1 = cfg.IsFeatureEnabled(new OptimizelyFeatureParameters(featureKey).WithArgument("IsLocal", true));
 
-				Console.WriteLine($"test_feature audience local is {enabled1}");
+				Console.WriteLine($"{featureKey} audience local is {enabled1}");
 				
 			} while (true);
 		}
@@ -63,24 +63,17 @@ namespace Optimizely
 		{
 			if (opt.TestPolling)
 			{
-				TestWithUpdater(opt.SdkKey);	
+				TestWithUpdater(opt.SdkKey, opt.FeatureToggle);	
 			}
 			else
 			{
-				TestSimpleWithDataFile(opt.SdkKey);
+				TestSimpleWithDataFile(opt.SdkKey, opt.FeatureToggle);
 			}
-		}
-
-		private static void HandleParseError(IEnumerable<Error> errs)
-		{
-		   Console.WriteLine("Fail to parse arguments");	
 		}
 
 		private static void Main(string[] args)
 		{
-			Parser.Default.ParseArguments<Options>(args)
-				.WithParsed(RunWithOptions)
-				.WithNotParsed(HandleParseError);
+			Parser.Default.ParseArguments<Options>(args).WithParsed(RunWithOptions);
 		}
 	}
 }
