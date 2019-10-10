@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using CommandLine;
 using EP.Core.Optimizely;
 
 namespace Optimizely
 {
-	internal class Program
+	internal static class Program
 	{
-		static void TestSimpleWithDataFile(string sdkKey)
+		private static void TestSimpleWithDataFile(string sdkKey)
 		{
 			var url = $"https://cdn.optimizely.com/datafiles/{sdkKey}.json";
 			
@@ -27,7 +30,6 @@ namespace Optimizely
 					// Evaluate a feature flag and a variable
 					var enabled1 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters("test_feature").WithArgument("IsLocal", true));
 
-
 					var enabled2 = oc.IsFeatureEnabled(new OptimizelyFeatureParameters("test_feature").WithArgument("IsLocal", false));
 
 					Console.WriteLine($"test_feature audience local is {enabled1}");
@@ -41,7 +43,7 @@ namespace Optimizely
 		}
 
 
-		static void TestWithUpdater(string sdkKey)
+		private static void TestWithUpdater(string sdkKey)
 		{
 			var cfg = OptimizelyClient.Create(new OptimizelyClientCreateParameters(sdkKey).WithPollingPeriod(5));
 
@@ -56,25 +58,29 @@ namespace Optimizely
 				
 			} while (true);
 		}
-		
-		static void Main(string[] args)
+
+		private static void RunWithOptions(Options opt)
 		{
-			if (args.Length < 1)
+			if (opt.TestPolling)
 			{
-				Console.WriteLine("Optimizely sdk key is required");
-			}
-			var sdkKey = args[0];
-
-			var usePolling = args.Length > 1 && args[1] == "poll";
-
-			if (usePolling)
-			{
-				TestWithUpdater(sdkKey);	
+				TestWithUpdater(opt.SdkKey);	
 			}
 			else
 			{
-				TestSimpleWithDataFile(sdkKey);
+				TestSimpleWithDataFile(opt.SdkKey);
 			}
+		}
+
+		private static void HandleParseError(IEnumerable<Error> errs)
+		{
+		   Console.WriteLine("Fail to parse arguments");	
+		}
+
+		private static void Main(string[] args)
+		{
+			Parser.Default.ParseArguments<Options>(args)
+				.WithParsed(RunWithOptions)
+				.WithNotParsed(HandleParseError);
 		}
 	}
 }
